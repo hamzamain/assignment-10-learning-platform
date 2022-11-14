@@ -1,10 +1,48 @@
+import { GithubAuthProvider, GoogleAuthProvider } from "firebase/auth";
 import React from "react";
-import { Link } from "react-router-dom";
+import { useContext } from "react";
+import toast from "react-hot-toast";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../Contexts/AuthProvider/AuthProvider";
 
 const Login = () => {
-  //bg:---> dark:dark:dark:bg-gray-900
-  //text----> dark:dark:dark:text-gray-100
-  //input:----> dark:dark:dark:border-gray-700 dark:dark:dark:bg-gray-900 dark:dark:dark:text-gray-100 focus:dark:dark:dark:border-sky-400
+  const { createUserWithProvider, signIn } = useContext(AuthContext);
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
+  const navigate = useNavigate();
+  const GoogleProvider = new GoogleAuthProvider();
+  const GithubProvider = new GithubAuthProvider();
+
+  const handleProviderLogin = (provider) => {
+    createUserWithProvider(provider)
+      .then((result) => {
+        const user = result.user;
+        console.log(user);
+        navigate(from, { replace: true });
+      })
+      .catch((error) => console.error(error));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const email = form.email.value;
+    const password = form.password.value;
+
+    signIn(email, password)
+      .then((result) => {
+        const user = result.user;
+        console.log(user);
+        navigate(from, { replace: true });
+        toast.success("login SuccessFull");
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        toast.error(errorCode);
+        console.error(error);
+      });
+  };
+
   return (
     <div>
       <div className="w-full max-w-md p-4 rounded-md shadow sm:p-8 border  my-5 mx-auto">
@@ -23,6 +61,7 @@ const Login = () => {
         </p>
         <div className="my-6 space-y-4">
           <button
+            onClick={() => handleProviderLogin(GoogleProvider)}
             aria-label="Login with Google"
             type="button"
             className="flex items-center justify-center w-full p-4 space-x-4 border rounded-md focus:ring-2 focus:ring-offset-1 dark:dark:dark:border-gray-400 focus:ring-sky-400"
@@ -37,6 +76,7 @@ const Login = () => {
             <p>Login with Google</p>
           </button>
           <button
+            onClick={() => handleProviderLogin(GithubProvider)}
             aria-label="Login with GitHub"
             role="button"
             className="flex items-center justify-center w-full p-4 space-x-4 border rounded-md focus:ring-2 focus:ring-offset-1 dark:dark:dark:border-gray-400 focus:ring-sky-400"
@@ -57,26 +97,26 @@ const Login = () => {
           <hr className="w-full dark:dark:dark:text-gray-400" />
         </div>
         <form
-          novalidate=""
+          onSubmit={handleSubmit}
+          noValidate=""
           action=""
           className="space-y-8 ng-untouched ng-pristine ng-valid"
         >
           <div className="space-y-4">
             <div className="space-y-2">
-              <label for="email" className="block text-sm">
+              <label htmlFor="email" className="block text-sm">
                 Email address
               </label>
               <input
                 type="email"
                 name="email"
-                id="email"
                 placeholder="leroy@jenkins.com"
                 className="w-full px-3 py-2 border rounded-md"
               />
             </div>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <label for="password" className="text-sm">
+                <label htmlFor="password" className="text-sm">
                   Password
                 </label>
                 <a
@@ -90,14 +130,13 @@ const Login = () => {
               <input
                 type="password"
                 name="password"
-                id="password"
                 placeholder="*****"
                 className="w-full px-3 py-2 border rounded-md bg-none"
               />
             </div>
           </div>
           <button
-            type="button"
+            type="submit"
             className="w-full px-8 py-3 font-semibold rounded-md dark:dark:dark:bg-sky-400 dark:dark:dark:text-gray-900"
           >
             Sign in

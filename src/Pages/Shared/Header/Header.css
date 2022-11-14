@@ -7,3 +7,9 @@
     text-decoration: none;
     margin-left: 20px;
 }
+
+.active {
+    color: gold;
+    text-decoration: underline;
+    background-size: cover;
+}
